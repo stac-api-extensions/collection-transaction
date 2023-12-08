@@ -1,0 +1,381 @@
+openapi: 3.0.1
+info:
+  title: The SpatioTemporal Asset Catalog API - Collection Transaction
+  version: 1.0.0-beta.1
+  description: >-
+    This is an OpenAPI definition of the SpatioTemporal Asset Catalog API Collection Transaction
+    specification.
+  contact:
+    name: STAC Specification
+    url: "http://stacspec.org"
+  license:
+    name: Apache License 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0"
+tags:
+  - name: Collection Transaction
+    description: >-
+      STAC-specific operations to add, remove, and edit Collections within STAC API - Collections
+      server.
+paths:
+  "/collections":
+    post:
+      summary: Add a new Collection
+      description: add a new STAC Collection or add multiple collections from a list of Collections to a server
+      operationId: postCollection
+      tags:
+        - Collection Transaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/postOrPutCollectionCollection"
+                - $ref: "#/components/schemas/postOrPutCollection"
+      responses:
+        "201":
+          description: Status of the create request.
+          headers:
+            Location:
+              description: The URL of the newly added resource (i.e. path of the resource end point)
+              schema:
+                type: string
+                format: url
+            ETag:
+              schema:
+                type: string
+              description: A string to ensure the item has not been modified
+          content:
+            application/json:
+              schema:
+                $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/collection"
+        "202":
+          description: The item was accepted for asynchronous action
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/responses/NotFound"
+        "500":
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/responses/Error"
+        default:
+          description: An error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/exception"
+  "/collections/{collectionId}":
+    parameters:
+      - $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/parameters/collectionId"
+    get:
+      tags:
+        - Collection Transaction
+      summary: Get a specific Collection
+      description: |-
+        Fetch the Collection with ID `collectionId`
+      operationId: getCollection
+      responses:
+        "200":
+          description: Adds a ETag header to the response
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: A string to ensure the item has not been modified
+    put:
+      summary: Replace a Collection completely
+      description: >-
+        Use this method to update an existing Collection. Requires the entire
+        Collection description be submitted.
+      operationId: updateCollection
+      tags:
+        - Collection Transaction
+      parameters:
+        - $ref: "#/components/parameters/IfMatch"
+      requestBody:
+        description: The request body must contain a representation of the replacement Collection.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/postOrPutCollection"
+      responses:
+        "200":
+          description: The Collection was replaced
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: An updated string to track changes
+          content:
+            application/json:
+              schema:
+                $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/collection"
+        "202":
+          description: The Collection was accepted for asynchronous action
+        "204":
+          description: The Collection was replaced
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: An updated string to track changes
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/responses/NotFound"
+        "412":
+          $ref: "#/components/responses/PreconditionFailed"
+        "500":
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/responses/Error"
+        default:
+          description: An error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/exception"
+    patch:
+      summary: Update a Collection partially
+      description: >-
+        Use this method to update an existing Collection. Requires a Collection
+        fragment (containing the fields to be updated) be submitted.
+      operationId: patchCollection
+      tags:
+        - Collection Transaction
+      parameters:
+        - $ref: "#/components/parameters/IfMatchOptional"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/patchCollection"
+      responses:
+        "200":
+          description: The Collection was replaced
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: An updated string to track changes
+          content:
+            application/json:
+              schema:
+                $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/collection"
+        "202":
+          description: The Collection was accepted for asynchronous action
+        "204":
+          description: Status of the update request.
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: A string to ensure the Collection has not been modified
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/responses/NotFound"
+        "500":
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/responses/Error"
+        default:
+          description: An error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/exception"
+    delete:
+      summary: Delete a Collection
+      description: Use this method to delete an existing Collection.
+      operationId: deleteCollection
+      tags:
+        - Collection Transaction
+      parameters:
+        - $ref: "#/components/parameters/IfMatch"
+      responses:
+        "200":
+          description: The resource was deleted.
+        "202":
+          description: The operation was accepted for asynchronous executiona.
+        "204":
+          description: The resource was deleted.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/responses/NotFound"
+        "500":
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/responses/Error"
+        default:
+          description: An error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/exception"
+components:
+  parameters:
+    IfMatch:
+      name: If-Match
+      in: header
+      description: >-
+        Only take the action if the ETag of the Collection still matches
+      required: true
+      schema:
+        type: string
+    IfMatchOptional:
+      name: If-Match
+      in: header
+      description: >-
+        Only take the action if the ETag of the Collection still matches
+      required: false
+      schema:
+        type: string
+  schemas:
+    collectionId:
+      type: string
+      description: A unique identifier for the Collection.
+    collectionType:
+      type: string
+      description: The STAC type for Collections.
+      enum:
+        - Collection
+    collectionTitle:
+      description: human readable title of the collection
+      type: string
+    collectionDescription:
+      type: string
+      description: >-
+        Detailed multi-line description to fully explain the collection.
+
+        [CommonMark 0.29](http://commonmark.org/) syntax MAY be used for
+        rich text representation.
+    collectionKeywords:
+      type: array
+      description: List of keywords describing the collection.
+      items:
+        type: string
+    collectionSummaries:
+          description: |-
+            A map of Item property summaries, either a set of values, a range of values or a JSON Schema.
+          type: object
+          additionalProperties:
+            oneOf:
+              - title: JSON Schema (draft-07)
+                type: object
+                minProperties: 1
+              - type: array
+                title: Set of values
+                minItems: 1
+                items:
+                  description: >-
+                    For each field only the original data type of the property can occur (except for arrays).
+              - type: object
+                title: Range / Statistics
+                required:
+                  - minimum
+                  - maximum
+                properties:
+                  minimum:
+                    title: Minimum value
+                    anyOf:
+                      - type: string
+                      - type: number
+                  maximum:
+                    title: Maximum value
+                    anyOf:
+                      - type: string
+                      - type: number
+    patchCollection:
+      description: >-
+        An object that contains at least a subset of the fields for a STAC Collection.
+      type: object
+      properties:
+        stac_version:
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/stac_version"
+        stac_extensions:
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/stac_extensions"
+        type:
+          $ref: "#/components/schemas/collectionType"
+        id:
+          $ref: "#/components/schemas/collectionId"
+        title:
+          $ref: "#/components/schemas/collectionTitle"
+        description:
+          $ref: "#/components/schemas/collectionDescription"
+        keywords:
+          $ref: "#/components/schemas/collectionKeywords"
+        license:
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/license"
+        extent:
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/extent"
+        providers:
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/providers"
+        links:
+          $ref: "#/components/schemas/collectionLinks"
+        assets:
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/assets"
+        summaries:
+          $ref: "#/components/schemas/collectionSummaries"
+    collectionLinks:
+      type: array
+      items:
+        $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/link"
+    postOrPutCollectionCollection:
+      description: >-
+        A list of Collections augmented with foreign members that contain values relevant to a STAC entity
+      type: object
+      required:
+        - collections
+      properties:
+        collections:
+          type: array
+          items:
+            $ref: "#/components/schemas/postOrPutCollection"
+        links:
+          $ref: "#/components/schemas/collectionLinks"
+    postOrPutCollection:
+      description: >-
+        An object that is a STAC Collection.
+      type: object
+      required:
+        - stac_version
+        - type
+        - id
+        - description
+        - license
+        - extent
+        - links
+      properties:
+        stac_version:
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/stac_version"
+        stac_extensions:
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/stac_extensions"
+        type:
+          $ref: "#/components/schemas/collectionType"
+        id:
+          $ref: "#/components/schemas/collectionId"
+        title:
+          $ref: "#/components/schemas/collectionTitle"
+        description:
+          $ref: "#/components/schemas/collectionDescription"
+        keywords:
+          $ref: "#/components/schemas/collectionKeywords"
+        license:
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/license"
+        extent:
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/extent"
+        providers:
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/providers"
+        links:
+          $ref: "#/components/schemas/collectionLinks"
+        assets:
+          $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/assets"
+        summaries:
+          $ref: "#/components/schemas/collectionSummaries"
+  responses:
+    BadRequest:
+      description: The request was malformed or semantically invalid
+      content:
+        application/json:
+          schema:
+            $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/exception"
+    PreconditionFailed:
+      description: Some condition specified by the request could not be met in the server
+      content:
+        application/json:
+          schema:
+            $ref: "https://api.stacspec.org/v1.0.0/ogcapi-features/openapi.yaml#/components/schemas/exception"
