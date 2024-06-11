@@ -30,8 +30,8 @@ If anything is unclear, the implementations check the Transaction Extension for 
 | Path                                 | Content-Type Header | Body                                              | Success Status | Description                                                             |
 | ------------------------------------ | ------------------- | ------------------------------------------------- | -------------- | ----------------------------------------------------------------------- |
 | `POST /collections`                  | `application/json`  | partial Collection or partial list of Collections | 201, 202       | Adds a new collection to a server.                                      |
-| `PUT /collections/{collectionId}`    | `application/json`  | partial Collection                                | 200, 202, 204  | Updates an existing item by ID using a complete Collection description. |
-| `PATCH /collections/{collectionId}`  | `application/json`  | partial Collection                                | 200, 202, 204  | Updates an existing item by ID using a partial Collection description.  |
+| `PUT /collections/{collectionId}`    | `application/json`  | partial Collection                                | 200, 202, 204  | Updates an existing collection by ID using a complete Collection description. |
+| `PATCH /collections/{collectionId}`  | `application/json`  | partial Collection                                | 200, 202, 204  | Updates an existing collection by ID using a partial Collection description.  |
 | `DELETE /collections/{collectionId}` | n/a                 | n/a                                               | 200, 202, 204  | Deletes an existing Collection by ID.                                   |
 
 ### POST
@@ -47,7 +47,7 @@ When the body is a partial Collection:
 When the body is a partial list of Collections:
 
 - Must only create a new resource.
-- Each Item in the list of Collections must have an `id` field.
+- Each Collection in the list of Collections must have an `id` field.
 - Must return 409 if a Collection exists for any of the id values.
 - Must return 201 without a `Location` header.
 - May create only some of the Collections in the list of Collections. Implementations are not
